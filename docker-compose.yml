@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+
+  enrichment-api:
+    build: ./enrichment-api
+    container_name: enrichment-api
+    ports:
+      - "9999:5000"
+    networks:
+      - data-enrichment
+    environment:
+      - PORT=5000
+
+  logstash:
+    build: ./logstash
+    container_name: logstash
+    env_file:
+      - logstash.env
+    ports:
+      - "9998:9998"
+    volumes:
+      - type: bind
+        source: ./logstash/config
+        target: /usr/share/logstash/config
+        read_only: true
+      - type: bind
+        source: ./logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+    networks:
+      - data-enrichment
+
+networks:
+  data-enrichment:
+    
