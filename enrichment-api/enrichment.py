@@ -4,11 +4,11 @@ from requests import request
 
 def enrich(body: dict, api: dict, response: DictProxy):
     try:
-        url = api["endpoint"].replace("${IP_ADDRESS}", body["ip"])
+        url = api["endpoint"].replace("${IP_ADDRESS_VARIABLE}", body["ip"])
         query = api.get("query-params", None)
-        if query and query.get("${IP_ADDRESS}", False):
-            query[query["${IP_ADDRESS}"]] = body["ip"]
-            query["${IP_ADDRESS}"] = None
+        if query and query.get("${IP_ADDRESS_VARIABLE}", False):
+            query[query["${IP_ADDRESS_VARIABLE}"]] = body["ip"]
+            query["${IP_ADDRESS_VARIABLE}"] = None
         res = request(
             method=api["method"],
             url=url,

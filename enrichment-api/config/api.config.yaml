@@ -8,7 +8,7 @@ apis:
     method: GET
     name: Abuse IP DB
     query-params:
-      ${IP_ADDRESS}: ipAddress
+      ${IP_ADDRESS_VARIABLE}: ipAddress
       maxAgeInDays: '90'
     use: true
   Fraud Sentinel:
@@ -17,7 +17,7 @@ apis:
     method: GET
     name: Fraud Sentinel
     query-params:
-      ${IP_ADDRESS}: ip
+      ${IP_ADDRESS_VARIABLE}: ip
       api_token: ${FRAUD_SENTINEL_API_KEY}
     use: true
   IP Quality Score:
@@ -26,7 +26,7 @@ apis:
     method: GET
     name: IP Quality Score
     query-params:
-      ${IP_ADDRESS}: ip
+      ${IP_ADDRESS_VARIABLE}: ip
       allow_public_access_points: true
       fast: false
       key: ${IP_QUALITY_SCORE_API_KEY}
@@ -43,10 +43,10 @@ apis:
     method: GET
     name: IP Reputation
     query-params:
-      ${IP_ADDRESS}: ip
+      ${IP_ADDRESS_VARIABLE}: ip
     use: true
   OTX Alien Vault:
-    endpoint: https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS}/general
+    endpoint: https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/general
     field-mapping: {}
     headers:
       X-OTX-API-KEY: ${OTX_ALIEN_VAULT_API_KEY}
@@ -55,14 +55,14 @@ apis:
     use: true
     vars:
       endpoints:
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS}/general
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS}/reputation
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS}/geo
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS}/malware
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS}/url_list
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS}/passive_dns
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/general
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/reputation
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/geo
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/malware
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/url_list
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/passive_dns
   Proxy Check:
-    endpoint: http://proxycheck.io/v2/${IP_ADDRESS}
+    endpoint: http://proxycheck.io/v2/${IP_ADDRESS_VARIABLE}
     field-mapping: {}
     method: GET
     name: Proxy Check
@@ -79,7 +79,7 @@ apis:
       vpn: 1
     use: true
   VPN API:
-    endpoint: https://vpnapi.io/api/${IP_ADDRESS}
+    endpoint: https://vpnapi.io/api/${IP_ADDRESS_VARIABLE}
     field-mapping: {}
     headers: {}
     method: GET
