@@ -5,12 +5,12 @@ services:
   enrichment-api:
     build: ./enrichment-api
     container_name: enrichment-api
+    env_file:
+      - enrichment-api.env
     ports:
-      - "9999:5000"
+      - "9999:9999"
     networks:
       - data-enrichment
-    environment:
-      - PORT=5000
 
   logstash:
     build: ./logstash
@@ -19,15 +19,20 @@ services:
       - logstash.env
     ports:
       - "9998:9998"
+      - "9996:9996"
     volumes:
       - type: bind
         source: ./logstash/config
         target: /usr/share/logstash/config
-        read_only: true
+        read_only: false
+      - type: bind
+        source: ./logstash/logs
+        target: /usr/share/logstash/logs
+        read_only: false
       - type: bind
         source: ./logstash/pipeline
         target: /usr/share/logstash/pipeline
-        read_only: true
+        read_only: false
     networks:
       - data-enrichment
 

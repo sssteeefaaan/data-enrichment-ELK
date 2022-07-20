@@ -1,5 +1,6 @@
 node.name: docker_logstash_1
-xpack.monitoring.enabled: true
 xpack.management.elasticsearch.cloud_id: ${ELASTIC_CLOUD_ID}
-xpack.management.elasticsearch.username: ${ELASTIC_USERNAME}
+xpack.management.elasticsearch.hosts: ${ELASTIC_HOST1}
 xpack.management.elasticsearch.password: ${ELASTIC_PASSWORD}
+xpack.management.elasticsearch.username: ${ELASTIC_USERNAME}
+xpack.monitoring.enabled: false
