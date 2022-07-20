@@ -6,8 +6,8 @@ from load_configuration import *
 from multiprocessing import Manager
 from requests import get
 
-apiconfig = Manager().dict(load_api_config_from_file("./config/api.config"))
-logconfig = Manager().dict(load_log_config_from_file("./config/log.config"))
+apiconfig = Manager().dict(load_api_config_from_file("./config/api.config.yaml"))
+logconfig = Manager().dict(load_log_config_from_file("./config/log.config.yaml"))
 app = FastAPI(debug=environ.get("FAST_API_DEBUG", "True") == "True", title=environ.get("FAST_API_TITLE", "Data Enrichment"))
 
 @app.post("/enrich")
