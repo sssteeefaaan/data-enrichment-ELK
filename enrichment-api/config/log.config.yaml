@@ -7,10 +7,10 @@ formatters:
     format: '%(asctime)s %(log_color)s%(bold)s%(levelname)-7s%(reset)s [%(purple)s%(process)d%(reset)s] %(cyan)s%(name)-25s%(reset)s %(message)s'
     datefmt: "%d-%b-%Y@%H:%M%z"
   verbose:
-    format: "[%(asctime)s] <%(levelno)2d>%(levelname)-7s %(name)-10s [%(process)d] %(processName)-20s %(message)s"
+    format: "[%(asctime)s] <%(levelno)2d>%(levelname)-7s %(name)-25s [%(process)d] %(processName)-25s [%(thread)05d] %(threadName)-25s %(message)s"
     datefmt: "%d-%b-%YT%T%z"
   syslog-format:
-    format: "%(name)-10s %(module)-16s [%(process)d] %(processName)-20s %(message)s"
+    format: "%(name)s %(module)s [%(process)d] %(processName)s %(message)s"
 handlers:
   console:
     class: logging.StreamHandler
@@ -19,7 +19,7 @@ handlers:
     stream: ext://sys.stdout
   file_hd:
     class: logging.handlers.RotatingFileHandler
-    filename: ${LOG_FILE_PATH:/var/log/data-enrichment.log}
+    filename: ${LOG_FILE_PATH}
     formatter: verbose
     level: DEBUG
     mode: a
