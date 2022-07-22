@@ -1,9 +1,21 @@
 log_config_schema = {
     "type": "object",
     "properties": {
-        "level": {
-            "type": "string"
+        "version": {
+            "type": "number"
+        },
+        "handlers": {
+            "type": "object"
+        },
+        "loggers": {
+            "type": "object"
+        },
+        "root": {
+            "type": "object"
+        },
+        "formatters": {
+            "type": "object"
         }
     },
-    "required": [ "level" ]
+    "required": [ "version", "handlers", "loggers", "root", "formatters" ]
 }

@@ -1,4 +1,3 @@
-access_log: true
 additional_settings:
   READ ME: Move settings you want to configure to the root of this file
   app_dir: None
@@ -9,14 +8,7 @@ additional_settings:
   headers: None
   limit_concurency: None
   limit_max_requests: None
-  log_config: None
   log_level: None
-  reload_dirs:
-  - None
-  reload_excludes:
-  - None
-  reload_includes:
-  - None
   ssl_ca_certs: None
   ssl_cert_reqs: int(ssl.CERT_NONE)
   ssl_certfile: None
@@ -24,27 +16,32 @@ additional_settings:
   ssl_keyfile_password: None
   ssl_version: int(SSL_PROTOCOL_VERSION)
   uds: None
-  workers: None
+log_config: "./config/uvicorn.log.config.yaml"
+access_log: true
+workers: 5
 backlog: 2048
 date_header: true
 debug: false
 factory: false
-host: ${UVICORN_HOST}
 http: auto
 interface: auto
 lifespan: auto
 loop: auto
-port: ${UVICORN_PORT}
 proxy_headers: true
-reload: true
-reload_delay: 0.25
-root_path: ''
 server_header: true
 ssl_ciphers: TLSv1
 timeout_keep_alive: 5
 use_colors: true
+reload: false
+reload_delay: 0.25
+root_path: ''
 ws: auto
 ws_max_size: 16777216
 ws_per_message_deflate: true
 ws_ping_interval: 20
 ws_ping_timeout: 20
+reload_dirs: "./*.py"
+reload_includes: "*.py"
+reload_excludes: "*.log*"
+host: ${UVICORN_HOST}
+port: ${UVICORN_PORT}

@@ -1,6 +1,7 @@
 from multiprocessing import Process, Lock, Manager
 from multiprocessing.managers import DictProxy
 from requests import request
+from app import logger
 
 def enrich(body: dict, api: dict, response: DictProxy):
     try:
@@ -17,23 +18,27 @@ def enrich(body: dict, api: dict, response: DictProxy):
             data=api.get("body", None)
         )
         if res.status_code == 200:
+            logger.debug(f'Success for { api["name"] }!')
             data = {
                 api["name"]: res.json()
             }
             response.update(data)
         else:
-            raise res.text
-    except Exception as e:
-        print(f'[Error]: ${ api["name"] } -> ${ e }')
+            raise Exception(res.text)
+    except BaseException as e:
+        logger.error(e)
 
 def process(body: dict, config: dict) -> dict:
     ps = []
     response = Manager().dict()
     for api in config["apis"].values():
-        print(f'API[{ api ["name"] }]: { str(api["use"]) }')
         if api["use"]:
             ps.append(Process(target=enrich, args=(body, api, response)))
             ps[-1].start()
     for p in ps:
         p.join()
+    if len(ps) == len(response.keys()):
+        logger.info("Got response from all APIs")
+    else:
+        logger.warning("Some APIs failed")
     return response
