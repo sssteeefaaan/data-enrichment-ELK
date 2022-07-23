@@ -1,10 +1,15 @@
-from yaml import Loader, load, FullLoader
 from jsonschema import validate
+
+from enum import Enum
+from os.path import join as pathjoin
+from os import environ
+from re import compile
+from sys import path as syspath
+from yaml import Loader, load, FullLoader
+
+syspath.append(pathjoin(syspath[0], ".."))
 from schemas.api_config_schema import api_configuration_schema
 from schemas.logging_config_schema import log_config_schema
-from re import compile
-from os import environ
-from enum import Enum
 
 loader = FullLoader
 class LoadEnum(Enum):

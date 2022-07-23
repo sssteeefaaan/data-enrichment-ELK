@@ -1,21 +1,18 @@
-from datetime import datetime, timedelta
-
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
+
+from datetime import datetime, timedelta
 from os import environ
-from dotenv import load_dotenv
 
 load_dotenv("auth.env")
 
-# to get a string like this run:
-# openssl rand -hex 32
 SECRET_KEY = environ.get("JWT_SECRET_KEY", "CF04769883651840D17D20812A2C1D52E2E694CF4D41CF83B7E35113A4BA9795")
 ALGORITHM = environ.get("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(environ.get("JWT_EXPIRE_MINUTES", "30"))
-
 
 admins_db = {
     environ.get("ADMIN_USERNAME", "admin"): {

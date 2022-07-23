@@ -1,14 +1,17 @@
-from threading import Thread, Lock
 from requests import request
-from redis import Redis
-from json import loads, dumps
-from api import manager
 
-manager["redis_client"] = Redis(host="localhost", port=6379, db=0)
+from json import loads, dumps
+from os.path import join as pathjoin
+from sys import path as syspath
+from threading import Thread, Lock
+
+syspath.append(pathjoin(syspath[0], ".."))
+from app import logger, redis_client
+
 def enrich(body: dict, api: dict, lock: Lock, response: dict):
     try:
-        key = f'{api["name"]}:{body["ip"]}'
-        data = manager["redis_client"].get(key)
+        key = f'{ api["name"] }:{ body["ip"] }'
+        data = redis_client.get(key)
         if not data:
             url = api["endpoint"].replace("${IP_ADDRESS_VARIABLE}", body["ip"])
             query = api.get("query-params", None)
@@ -23,9 +26,9 @@ def enrich(body: dict, api: dict, lock: Lock, response: dict):
                 data=api.get("body", None)
             )
             if res.status_code == 200:
-                manager["logger"].debug(f'Success for { api["name"] }!')
+                logger.debug(f'Success for { api["name"] }!')
                 data = res.json()
-                manager["redis_client"].set(key, dumps(data))
+                redis_client.set(key, dumps(data))
             else:
                 raise Exception(res.text)
         else:
@@ -36,7 +39,7 @@ def enrich(body: dict, api: dict, lock: Lock, response: dict):
         })
         lock.release()
     except BaseException as e:
-        manager["logger"].error(e)
+        logger.error(e)
 
 def process(body: dict, config: dict) -> dict:
     threads = list()
@@ -49,7 +52,7 @@ def process(body: dict, config: dict) -> dict:
     for th in threads:
         th.join()
     if len(threads) == len(response.keys()):
-        manager["logger"].info("Got response from all APIs")
+        logger.info("Got response from all APIs")
     else:
-        manager["logger"].warning("Some APIs failed")
+        logger.warning("Some APIs failed")
     return response
