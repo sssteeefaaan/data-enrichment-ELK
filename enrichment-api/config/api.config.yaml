@@ -1,6 +1,7 @@
 apis:
   Abuse IP DB:
     endpoint: https://api.abuseipdb.com/api/v2/check
+    map-fields: false
     field-mapping: {}
     headers:
       Accept: application/json
@@ -13,6 +14,7 @@ apis:
     use: true
   Fraud Sentinel:
     endpoint: https://api.fraudsentinel.com/api/sentinel.json
+    map-fields: false
     field-mapping: {}
     method: GET
     name: Fraud Sentinel
@@ -22,6 +24,7 @@ apis:
     use: true
   IP Quality Score:
     endpoint: https://ipqualityscore.com/api/json/ip
+    map-fields: false
     field-mapping: {}
     method: GET
     name: IP Quality Score
@@ -36,6 +39,7 @@ apis:
     use: true
   IP Reputation:
     endpoint: https://ip-reputation-geoip-and-detect-vpn.p.rapidapi.com/
+    map-fields: false
     field-mapping: {}
     headers:
       X-RapidAPI-Host: ip-reputation-geoip-and-detect-vpn.p.rapidapi.com
@@ -47,6 +51,7 @@ apis:
     use: true
   OTX Alien Vault:
     endpoint: https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/general
+    map-fields: false
     field-mapping: {}
     headers:
       X-OTX-API-KEY: ${OTX_ALIEN_VAULT_API_KEY}
@@ -63,7 +68,25 @@ apis:
       - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/passive_dns
   Proxy Check:
     endpoint: http://proxycheck.io/v2/${IP_ADDRESS_VARIABLE}
-    field-mapping: {}
+    map-fields: true
+    field-mapping:
+      network:
+        autonomous-system-number: asn
+        autonomous-system-organization: organisation
+        provider: provider
+      location:
+        continent: continent
+        country: country
+        isocode: isocode
+        region: region
+        regioncode: regioncode
+        city: city
+        latitude: latitude
+        longitude: longitude
+      security:
+        proxy: proxy
+        proxy-type: type
+        risk: risk
     method: GET
     name: Proxy Check
     query-params:
@@ -80,8 +103,30 @@ apis:
     use: true
   VPN API:
     endpoint: https://vpnapi.io/api/${IP_ADDRESS_VARIABLE}
-    field-mapping: {}
-    headers: {}
+    map-fields: true
+    field-mapping:
+      security:
+        vpn: vpn
+        proxy: proxy
+        tor: top
+        relay: relay
+      location:
+        city: city
+        region: region
+        country: country
+        continent: continent
+        region-code: region_code
+        country-code: country_code
+        latitude: latitude
+        longitude: longitude
+        time-zone: time_zone
+        locale-code: locale_code
+        metro-code: metro_code
+        is-in-european-union: is_in_european_union
+      network:
+        network: network
+        autonomous-system-number: autonomous_system_number
+        autonomous-system-organization: autonomous_system_organization
     method: GET
     name: VPN API
     query-params:

@@ -29,6 +29,9 @@ api_configuration_schema = {
                         "body": {
                             "type": "object"
                         },
+                        "map-fields": {
+                            "type": "boolean"
+                        },
                         "field-mapping": {
                             "type": "object"
                         },
@@ -41,7 +44,7 @@ api_configuration_schema = {
                         "use",
                         "endpoint",
                         "method",
-                        "field-mapping"
+                        "map-fields"
                     ]
                 }
             }

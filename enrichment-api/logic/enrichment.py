@@ -33,13 +33,33 @@ def enrich(body: dict, api: dict, lock: Lock, response: dict):
                 raise Exception(res.text)
         else:
             data = loads(data.decode("utf-8"))
+        if api["map-fields"]:
+            mapped_data = map_fields(data, api["field-mapping"])
         lock.acquire()
         response.update({
-            api["name"]: data
+            api["name"]: mapped_data
         })
         lock.release()
     except BaseException as e:
         logger.error(e)
+
+def map_fields(data: dict, mapping: dict):
+    res = {}
+    for k in mapping.keys():
+        mp = mapping[k]
+        if type(mp) == dict:
+            res[k] = map_fields(data, mp)
+        elif type(mp) == str:
+            val = data.get(mp, None)
+            if type(val) is dict:
+                res.update(map_fields(val, { k: mp }))
+            elif val is not None:
+                res[k] = data.pop(mp)
+            else:
+                for v in data.values():
+                    if type(v) == dict:
+                        res.update(map_fields(v, { k: mp }))
+    return res
 
 def process(body: dict, config: dict) -> dict:
     threads = list()
