@@ -14,12 +14,12 @@ formatters:
 handlers:
   console:
     class: logging.StreamHandler
-    level: DEBUG
+    level: INFO
     formatter: simple
     stream: ext://sys.stdout
   file_hd:
     class: logging.handlers.RotatingFileHandler
-    filename: ${LOG_FILE_PATH}
+    filename: ${ LOG_FILE_PATH }
     formatter: verbose
     level: DEBUG
     mode: a

@@ -4,7 +4,7 @@ api_configuration_schema = {
         "apis": {
             "type": "object",
             "patternProperties": {
-                "^.*$": {
+                "^[A-z$].*": {
                     "type": "object",
                     "properties": {
                         "name": {
@@ -21,10 +21,16 @@ api_configuration_schema = {
                             "enum": ["GET", "POST"]
                         },
                         "query-params": {
-                            "type": "object"
+                            "type": "object",
+                            "propertyNames": {
+                                "pattern": "^[A-z$].*"
+                            }
                         },
                         "headers": {
-                            "type": "object"
+                            "type": "object",
+                            "propertyNames": {
+                                "pattern": "^[A-z$].*"
+                            }
                         },
                         "body": {
                             "type": "object"
@@ -33,9 +39,9 @@ api_configuration_schema = {
                             "type": "boolean"
                         },
                         "field-mapping": {
-                            "type": "object"
+                            "$ref": "#/$defs/mappings"
                         },
-                        "vars": {
+                        "additional-variables": {
                             "type": "object"
                         }
                     },
@@ -47,10 +53,22 @@ api_configuration_schema = {
                         "map-fields"
                     ]
                 }
-            }
+            },
+            "additionalProperties": False
         }
     },
     "required": [
         "apis"
-    ]
+    ],
+    "additionalProperties": False,
+
+    "$defs": {
+        "mappings": {
+            "type": ["string", "object"],
+            "patternProperties": {
+                "^[A-z$].*": { "$ref": "#/$defs/mappings" }
+            },
+            "additionalProperties": False
+        }
+    }
 }

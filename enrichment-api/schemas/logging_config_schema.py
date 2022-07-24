@@ -4,18 +4,34 @@ log_config_schema = {
         "version": {
             "type": "number"
         },
+        "formatters": {
+            "type": "object"
+        },
+        "filters": {
+            "type": "object"
+        },
         "handlers": {
             "type": "object"
         },
         "loggers": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "enrichment-api": {
+                    "type": "object"
+                }
+            },
+            "required": [ "enrichment-api" ]
         },
         "root": {
             "type": "object"
         },
-        "formatters": {
-            "type": "object"
+        "disable_existing_loggers": {
+            "type": "boolean"
+        },
+        "incremental": {
+            "type": "boolean"
         }
     },
-    "required": [ "version", "handlers", "loggers", "root", "formatters" ]
+    "required": [ "handlers", "loggers", "root", "formatters" ],
+    "additionalProperties": False
 }

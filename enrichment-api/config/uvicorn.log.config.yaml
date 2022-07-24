@@ -10,9 +10,11 @@ handlers:
   default:
     formatter: simple
     class: logging.StreamHandler
+    level: DEBUG
     stream: ext://sys.stderr 
   access:
     formatter: simple
+    level: INFO
     class: logging.StreamHandler
     stream: ext://sys.stdout
 loggers:

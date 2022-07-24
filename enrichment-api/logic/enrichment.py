@@ -34,10 +34,10 @@ def enrich(body: dict, api: dict, lock: Lock, response: dict):
         else:
             data = loads(data.decode("utf-8"))
         if api["map-fields"]:
-            mapped_data = map_fields(data, api["field-mapping"])
+            data = map_fields(data, api["field-mapping"])
         lock.acquire()
         response.update({
-            api["name"]: mapped_data
+            api["name"]: data
         })
         lock.release()
     except BaseException as e:

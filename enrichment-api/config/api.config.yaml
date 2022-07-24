@@ -2,30 +2,27 @@ apis:
   Abuse IP DB:
     endpoint: https://api.abuseipdb.com/api/v2/check
     map-fields: false
-    field-mapping: {}
     headers:
       Accept: application/json
-      Key: ${ABUSE_IP_DB_API_KEY}
+      Key: ${ ABUSE_IP_DB_API_KEY }
     method: GET
     name: Abuse IP DB
     query-params:
-      ${IP_ADDRESS_VARIABLE}: ipAddress
+      ${ IP_ADDRESS_VARIABLE }: ipAddress
       maxAgeInDays: '90'
     use: true
   Fraud Sentinel:
     endpoint: https://api.fraudsentinel.com/api/sentinel.json
     map-fields: false
-    field-mapping: {}
     method: GET
     name: Fraud Sentinel
     query-params:
-      ${IP_ADDRESS_VARIABLE}: ip
-      api_token: ${FRAUD_SENTINEL_API_KEY}
+      ${ IP_ADDRESS_VARIABLE   }: ip
+      api_token: ${ FRAUD_SENTINEL_API_KEY }
     use: true
   IP Quality Score:
     endpoint: https://ipqualityscore.com/api/json/ip
     map-fields: false
-    field-mapping: {}
     method: GET
     name: IP Quality Score
     query-params:
@@ -40,7 +37,6 @@ apis:
   IP Reputation:
     endpoint: https://ip-reputation-geoip-and-detect-vpn.p.rapidapi.com/
     map-fields: false
-    field-mapping: {}
     headers:
       X-RapidAPI-Host: ip-reputation-geoip-and-detect-vpn.p.rapidapi.com
       X-RapidAPI-Key: ${IP_REPUTATION_API_KEY}
@@ -52,13 +48,12 @@ apis:
   OTX Alien Vault:
     endpoint: https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/general
     map-fields: false
-    field-mapping: {}
     headers:
       X-OTX-API-KEY: ${OTX_ALIEN_VAULT_API_KEY}
     method: GET
     name: OTX Alien Vault
     use: true
-    vars:
+    additional-variables:
       endpoints:
       - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/general
       - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/reputation
@@ -92,7 +87,7 @@ apis:
     query-params:
       asn: 1
       days: 7
-      key: ${PROXY_CHECK_API_KEY}
+      key: ${ PROXY_CHECK_API_KEY }
       node: 1
       port: 1
       risk: 1

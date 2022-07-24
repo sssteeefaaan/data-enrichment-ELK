@@ -3,7 +3,7 @@ from jsonschema import validate
 from enum import Enum
 from os.path import join as pathjoin
 from os import environ
-from re import compile
+from re import compile, sub, findall
 from sys import path as syspath
 from yaml import Loader, load, FullLoader
 
@@ -19,21 +19,17 @@ class LoadEnum(Enum):
     DICTIONARY=3
 
 def construct_full_loader(loader: Loader):
-    pattern = compile('\$\{[^\{\}]+\}')
+    pattern = compile('\$\{\s*[A-Za-z0-9_]+\s*([\:]\s*[^\}\s]+\s*)?\}')
     loader.add_implicit_resolver("", pattern, None)
 
-    def constructor_env_variables(loader, node):
-        value = loader.construct_scalar(node)
-        match = pattern.findall(value)
-        if match:
-            full_value = value
-            for g in match:
-                vals = (g[2:-1]).split(":") + [g]
-                full_value = full_value.replace(
-                    vals[-1],
-                    environ.get(vals[0], vals[1])
-                )
-            return full_value
+    def constructor_env_variables(loader : Loader, node):
+        full_value = loader.construct_scalar(node)
+        value = sub("\s", "", full_value)
+        vals = (value[2:-1]).split(":") + [value]
+        value = value.replace(
+            vals[-1],
+            environ.get(vals[0], vals[1])
+        )
         return value
 
     loader.add_constructor("", constructor_env_variables)
