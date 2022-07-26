@@ -1,9 +1,13 @@
 from jsonschema import validate
 
 from enum import Enum
+from json import loads
+from logging import getLogger
+from logging.config import dictConfig
+from multiprocessing_logging import install_mp_handler
 from os.path import join as pathjoin
 from os import environ
-from re import compile, sub, findall
+from re import compile, sub
 from sys import path as syspath
 from yaml import Loader, load, FullLoader
 
@@ -98,5 +102,30 @@ def load_log_config(source: dict | bytes | str, type: LoadEnum):
     elif type == LoadEnum.FILE:
         return load_log_config_from_file(source)
     raise BaseException("UNKNOWN TYPE")
+
+
+def setup_config_change(logger, log_config, api_config, redis_client):
+
+    def change_api_config(msg):
+        try:
+            api_config.update(loads(msg["data"].decode("utf-8")))
+        except BaseException as e:
+            logger.error(e)
+
+    def change_log_config(msg):
+        try:
+            log_config.update(loads(msg["data"].decode("utf-8")))
+            dictConfig(log_config)
+            logger = getLogger("enrichment-api")
+            install_mp_handler(logger)
+        except BaseException as e:
+            logger.error(e)
+
+    pub_sub = redis_client.pubsub()
+    pub_sub.subscribe(**{
+        "api-config": change_api_config,
+        "log-config": change_log_config
+    })
+    pub_sub.run_in_thread(0.1)
 
 construct_full_loader(loader)

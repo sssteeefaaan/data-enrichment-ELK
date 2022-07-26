@@ -7,8 +7,11 @@ from pydantic import BaseModel
 
 from datetime import datetime, timedelta
 from os import environ
+from os.path import join as pathjoin
+from sys import path as syspath
 
-load_dotenv("auth.env")
+syspath.append(pathjoin(syspath[0], ".."))
+load_dotenv("enrichment-api.env")
 
 SECRET_KEY = environ.get("JWT_SECRET_KEY", "CF04769883651840D17D20812A2C1D52E2E694CF4D41CF83B7E35113A4BA9795")
 ALGORITHM = environ.get("JWT_ALGORITHM", "HS256")
@@ -78,16 +81,16 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+    to_encode.update({ "exp" : expire })
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+        status.HTTP_401_UNAUTHORIZED,
+        "Could not validate credentials",
+        {"WWW-Authenticate": "Bearer"},
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -105,5 +108,5 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
     if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(400, detail="Inactive user")
     return current_user
