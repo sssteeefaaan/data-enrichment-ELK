@@ -13,6 +13,28 @@ api_configuration_schema = {
                         "use": {
                             "type": "boolean"
                         },
+                        "parameters": {
+                            "type": "object",
+                            "patternProperties":{
+                                "^[A-z$].*": {
+                                    "type": "object",
+                                    "properties": {
+                                        "positions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "enum": ["endpoint", "query-params", "body", "headers", "field-mapping"]
+                                            }
+                                        },
+                                        "key": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": ["positions", "key"],
+                                    "additionalProperties": False
+                                }
+                            }
+                        },
                         "endpoint": {
                             "type": "string"
                         },
@@ -41,6 +63,14 @@ api_configuration_schema = {
                         "field-mapping": {
                             "$ref": "#/$defs/mappings"
                         },
+                        "category": {
+                            "type": "string"
+                        },
+                        "cache-lasts-days": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "exclusiveMaximum": 30
+                        },
                         "additional-variables": {
                             "type": "object"
                         }
@@ -50,7 +80,8 @@ api_configuration_schema = {
                         "use",
                         "endpoint",
                         "method",
-                        "map-fields"
+                        "map-fields",
+                        "parameters"
                     ]
                 }
             },

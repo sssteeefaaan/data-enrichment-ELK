@@ -1,32 +1,61 @@
 apis:
   Abuse IP DB:
+    name: Abuse IP DB
     endpoint: https://api.abuseipdb.com/api/v2/check
     map-fields: false
     headers:
       Accept: application/json
       Key: ${ ABUSE_IP_DB_API_KEY }
     method: GET
-    name: Abuse IP DB
     query-params:
-      ${ IP_ADDRESS_VARIABLE }: ipAddress
       maxAgeInDays: '90'
     use: true
+    parameters:
+      ip:
+        positions: [query-params]
+        key: ipAddress
+    cache-lasts-days: 1
   Fraud Sentinel:
+    name: Fraud Sentinel
     endpoint: https://api.fraudsentinel.com/api/sentinel.json
     map-fields: false
     method: GET
-    name: Fraud Sentinel
     query-params:
-      ${ IP_ADDRESS_VARIABLE   }: ip
       api_token: ${ FRAUD_SENTINEL_API_KEY }
     use: true
+    parameters:
+      ip:
+        positions: [query-params]
+        key: ip
+    cache-lasts-days: 1
   IP Quality Score:
-    endpoint: https://ipqualityscore.com/api/json/ip
-    map-fields: false
-    method: GET
     name: IP Quality Score
+    endpoint: https://ipqualityscore.com/api/json/ip
+    map-fields: true
+    field-mapping:
+      security:
+        vpn: vpn
+        proxy: proxy
+        tor: tor
+        bot: bot_status
+        risk: fraud_score
+        crawler: is_crawler
+        mobile: mobile
+      location:
+        city: city
+        region: region
+        country-code: country_code
+        latitude: latitude
+        longitude: longitude
+        time-zone: timezone
+        zip-code: zip_code
+      network:
+        host: host
+        autonomous-system-number: ASN
+        autonomous-system-organization: organization
+        provider: ISP
+    method: GET
     query-params:
-      ${IP_ADDRESS_VARIABLE}: ip
       allow_public_access_points: true
       fast: false
       key: ${IP_QUALITY_SCORE_API_KEY}
@@ -34,56 +63,103 @@ apis:
       mobile: false
       strictness: 0
     use: true
+    parameters:
+      ip:
+        positions: [query-params]
+        key: ip
+    cache-lasts-days: 1
   IP Reputation:
+    name: IP Reputation
     endpoint: https://ip-reputation-geoip-and-detect-vpn.p.rapidapi.com/
-    map-fields: false
+    map-fields: true
+    field-mapping:
+      security:
+        risk: risk
+        risk-level: risk_level
+        mobile: mobile_carrier
+        anonymizer: anonymizer
+        vpn: is_vpn_proxy
+        tor: is_tor
+        datacenter: is_datacenter
+        educational: is_educational
+        military: is_military
+        government: is_government
+        business: is_business
+        malicious: is_malicious
+        abusive: is_abusive
+        bogon: is_bogon
+      location:
+        latitude: latitude
+        longitude: longitude
+        city: city
+        region: region
+        region-code: region_code
+        country: country
+        country-code: country_code
+        continent: continent
+        continent-code: continent_code
+        is-in-european-union: in_eu
+        time-zone: time_zone
+      network:
+        network: cidr
+        domain: domain
+        autonomous-system-number: asn
+        autonomous-system-organization: organization
+        provider: isp
     headers:
       X-RapidAPI-Host: ip-reputation-geoip-and-detect-vpn.p.rapidapi.com
       X-RapidAPI-Key: ${IP_REPUTATION_API_KEY}
     method: GET
-    name: IP Reputation
-    query-params:
-      ${IP_ADDRESS_VARIABLE}: ip
     use: true
+    parameters:
+      ip:
+        positions: [query-params]
+        key: ip
+    cache-lasts-days: 1
   OTX Alien Vault:
-    endpoint: https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/general
+    name: OTX Alien Vault
+    endpoint: https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/general
     map-fields: false
     headers:
       X-OTX-API-KEY: ${OTX_ALIEN_VAULT_API_KEY}
     method: GET
-    name: OTX Alien Vault
     use: true
+    parameters:
+      ip:
+        positions: [endpoint]
+        key: <IP_ADDRESS>
     additional-variables:
       endpoints:
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/general
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/reputation
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/geo
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/malware
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/url_list
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/${IP_ADDRESS_VARIABLE}/passive_dns
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/general
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/reputation
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/geo
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/malware
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/url_list
+      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/passive_dns
+    cache-lasts-days: 1
   Proxy Check:
-    endpoint: http://proxycheck.io/v2/${IP_ADDRESS_VARIABLE}
+    name: Proxy Check
+    endpoint: http://proxycheck.io/v2/IP_ADDRESS
     map-fields: true
     field-mapping:
       network:
-        autonomous-system-number: asn
-        autonomous-system-organization: organisation
-        provider: provider
+        autonomous-system-number: IP_ADDRESS.asn
+        autonomous-system-organization: IP_ADDRESS.organisation
+        provider: IP_ADDRESS.provider
       location:
-        continent: continent
-        country: country
-        isocode: isocode
-        region: region
-        regioncode: regioncode
-        city: city
-        latitude: latitude
-        longitude: longitude
+        continent: IP_ADDRESS.continent
+        country: IP_ADDRESS.country
+        isocode: IP_ADDRESS.isocode
+        region: IP_ADDRESS.region
+        regioncode: IP_ADDRESS.regioncode
+        city: IP_ADDRESS.city
+        latitude: IP_ADDRESS.latitude
+        longitude: IP_ADDRESS.longitude
       security:
-        proxy: proxy
-        proxy-type: type
-        risk: risk
+        proxy: IP_ADDRESS.proxy
+        proxy-type: IP_ADDRESS.type
+        risk: IP_ADDRESS.risk
     method: GET
-    name: Proxy Check
     query-params:
       asn: 1
       days: 7
@@ -96,34 +172,46 @@ apis:
       time: 1
       vpn: 1
     use: true
+    parameters:
+      ip:
+        positions: 
+          - endpoint
+          - field-mapping
+        key: IP_ADDRESS
+    cache-lasts-days: 1
   VPN API:
-    endpoint: https://vpnapi.io/api/${IP_ADDRESS_VARIABLE}
+    name: VPN API
+    endpoint: https://vpnapi.io/api/<IP_ADDRESS>
     map-fields: true
     field-mapping:
       security:
-        vpn: vpn
-        proxy: proxy
-        tor: top
-        relay: relay
+        vpn: security.vpn
+        proxy: security.proxy
+        tor: security.tor
+        relay: security.relay
       location:
-        city: city
-        region: region
-        country: country
-        continent: continent
-        region-code: region_code
-        country-code: country_code
-        latitude: latitude
-        longitude: longitude
-        time-zone: time_zone
-        locale-code: locale_code
-        metro-code: metro_code
-        is-in-european-union: is_in_european_union
+        city: location.city
+        region: location.region
+        country: location.country
+        continent: location.continent
+        region-code: location.region_code
+        country-code: location.country_code
+        latitude: location.latitude
+        longitude: location.longitude
+        time-zone: location.time_zone
+        locale-code: location.locale_code
+        metro-code: location.metro_code
+        is-in-european-union: location.is_in_european_union
       network:
-        network: network
-        autonomous-system-number: autonomous_system_number
-        autonomous-system-organization: autonomous_system_organization
+        network: network.network
+        autonomous-system-number: network.autonomous_system_number
+        autonomous-system-organization: network.autonomous_system_organization
     method: GET
-    name: VPN API
     query-params:
       key: ${VPN_API_KEY}
     use: true
+    parameters:
+      ip:
+        positions: [endpoint]
+        key: <IP_ADDRESS>
+    cache-lasts-days: 1
