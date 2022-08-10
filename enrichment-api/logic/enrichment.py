@@ -32,12 +32,12 @@ def enrich(params: dict, api: dict, lock: Lock, response: dict):
                 data=req["body"]
             )
             if res.status_code == 200:
-                logger.debug(f'Success for { api["name"] }!')
+                logger.debug(f'Success for [{ api["name"] }]')
                 raw_data = res.json()
                 redis_client.set(key, dumps(raw_data))
                 redis_client.expire(key, int(api["cache-lasts-days"]) * 60 * 60 * 24)
             else:
-                raise Exception(res.text)
+                raise Exception(f"Endpoint [{ api['name'] }] failed: '{ res.text }'")
         else:
             raw_data = loads(raw_data.decode("utf-8"))
         processed_data = raw_data
@@ -60,7 +60,7 @@ def enrich(params: dict, api: dict, lock: Lock, response: dict):
         })
         lock.release()
     except BaseException as e:
-        logger.error(f"{ api['name'] } -> { e }", exc_info=1)
+        logger.error(f"{ api['name'] } -> { e }", exc_info=1, stack_info=1)
 
 def find_all_paths(data : dict, prefix : str = "") -> list:
     ret = list()
@@ -74,7 +74,7 @@ def find_all_paths(data : dict, prefix : str = "") -> list:
 def check_unmapped(data : dict, name : str, path : str = ""):
     for k, v in data.items():
         if type(v) != dict:
-            logger.warning(f"Unused value '{ path }{ k }' -> '{ v }' in field mapping for '{ name }'!")
+            logger.warning(f"Unused field ['{ path }{ k }' -> '{ v }'] in mappings for [{ name }]")
         else:
             check_unmapped(v, name, f'{ k }.')
 
@@ -88,14 +88,14 @@ def map_fields(data: dict, mapping: dict, variables : dict = dict()):
             else:
                 res[k] = find_item_path(data, mp.split("."), variables)
     except KeyError as e:
-        logger.error(f"KeyError: { e }", exc_info=1)
+        logger.error(f"KeyError: { e }", exc_info=1, stack_info=1)
     except BaseException as e:
-        logger.error(e, exc_info=1)
+        logger.error(e, exc_info=1, stack_info=1)
     return res
 
 def find_item_path(data : dict, path : list, variables : dict = dict()):
     if len(path) < 1:
-        return ""
+        return "ERROR"
     head = path.pop(0)
     head = variables.get(head, head)
     try:
@@ -103,7 +103,7 @@ def find_item_path(data : dict, path : list, variables : dict = dict()):
             return data.pop(head)
         return find_item_path(data[head], path)
     except BaseException as e:
-        logger.error(e, exc_info=1)
+        logger.error(e, exc_info=1, stack_info=1)
         return "ERROR"
     
 def check_dups(data : dict):

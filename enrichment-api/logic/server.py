@@ -20,21 +20,21 @@ app = FastAPI(debug=environ.get("FAST_API_DEBUG", "True") == "True", title=envir
 @app.post("/enrich", tags=["Data Enrichment"], description="Get additional information about the ip address")
 async def enrich(request : Request, body: dict = { "ip": get('https://api.myip.com').json()["ip"] }):
     try:
-        logger.debug(f"POST-Enrich: Accessed { request.client.host }:{ request.client.port }")
+        logger.warning(f"POST-Enrich: Accessed from [{ request.client.host }:{ request.client.port }]")
         return process(body, api_config)
     except BaseException as e:
-        logger.error(e, exc_info=1)
+        logger.error(e, exc_info=1, stack_info=1)
         return JSONResponse({ "message": "Unsuccess!" }, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @app.get("/api-configuration", dependencies=[Depends(get_current_active_user)], tags=["Admin"])
 def read_api_configuration(request : Request):
-    logger.debug(f"GET-API-Configuration: Accessed { request.client.host }:{ request.client.port }")
+    logger.debug(f"GET-API-Configuration: Accessed from [{ request.client.host }:{ request.client.port }]")
     return api_config
 
 @app.post("/api-configuration", dependencies=[Depends(get_current_active_user)], tags=["Admin"], description="Upload .yaml API configuration file")
 async def update_api_configuration(request : Request, configuration_file: UploadFile):
     try:
-        logger.debug(f"POST-API-Configuration: Accessed { request.client.host }:{ request.client.port }")
+        logger.debug(f"POST-API-Configuration: Accessed from [{ request.client.host }:{ request.client.port }]")
         filename = f'./config/user/api-{ datetime.now().strftime("%Y-%m-%d@%H-%M-%S") }.config.yaml'
         content = (await configuration_file.read()).decode("utf-8")
         write_config(filename, content)
@@ -42,18 +42,18 @@ async def update_api_configuration(request : Request, configuration_file: Upload
         redis_client.publish("api-config", dumps(config))
         return { "message": "Success!" }
     except Exception as e:
-        logger.error(e, exc_info=1)
+        logger.error(e, exc_info=1, stack_info=1)
         return JSONResponse({ "message": "Unsuccess!" }, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @app.get("/log-configuration", dependencies=[Depends(get_current_active_user)], tags=["Admin"])
 def read_log_configuration(request : Request):
-    logger.debug(f"GET-Log-Configuration: Accessed { request.client.host }:{ request.client.port }")
+    logger.debug(f"GET-Log-Configuration: Accessed from [{ request.client.host }:{ request.client.port }]")
     return log_config
 
 @app.post("/log-configuration", dependencies=[Depends(get_current_active_user)], tags=["Admin"], description="Upload .yaml log configuration file")
 async def update_log_configuration(request : Request, configuration_file: UploadFile):
     try:
-        logger.debug(f"POST-Log-Configuration: Accessed { request.client.host }:{ request.client.port }")
+        logger.debug(f"POST-Log-Configuration: Accessed from [{ request.client.host }:{ request.client.port }]")
         filename = f'./config/user/log-{ datetime.now().strftime("%Y-%m-%d@%H-%M-%S") }.config.yaml'
         content = (await configuration_file.read()).decode("utf-8")
         write_config(filename, content)
@@ -61,13 +61,13 @@ async def update_log_configuration(request : Request, configuration_file: Upload
         redis_client.publish("log-config", dumps(config))
         return { "message": "Success!" }
     except Exception as e:
-        logger.error(e, exc_info=1)
+        logger.error(e, exc_info=1, stack_info=1)
         return JSONResponse({ "message": "Unsuccess!" }, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @app.post("/token", response_model=Token, tags=["Authentication"])
 async def login_for_access_token(request : Request, form_data: OAuth2PasswordRequestForm = Depends()):
     try:
-        logger.debug(f"POST-Token: Accessed { request.client.host }:{ request.client.port }")
+        logger.debug(f"POST-Token: Accessed from [{ request.client.host }:{ request.client.port }]")
         user = authenticate_user(admins_db, form_data.username, form_data.password)
         if not user:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED,
@@ -80,5 +80,5 @@ async def login_for_access_token(request : Request, form_data: OAuth2PasswordReq
         )
         return { "access_token": access_token, "token_type": "bearer" }
     except BaseException as e:
-        logger.error(e, exc_info=1)
+        logger.error(e, exc_info=1, stack_info=1)
         return JSONResponse({ "message": "Unsuccess!" }, status_code=status.HTTP_401_UNAUTHORIZED)
