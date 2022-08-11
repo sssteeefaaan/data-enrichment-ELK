@@ -1,6 +1,5 @@
 apis:
-  Abuse IP DB:
-    name: Abuse IP DB
+  - name: Abuse IP DB
     endpoint: https://api.abuseipdb.com/api/v2/check
     map-fields: false
     headers:
@@ -15,8 +14,7 @@ apis:
         positions: [query-params]
         key: ipAddress
     cache-lasts-days: 1
-  Fraud Sentinel:
-    name: Fraud Sentinel
+  - name: Fraud Sentinel
     endpoint: https://api.fraudsentinel.com/api/sentinel.json
     map-fields: false
     method: GET
@@ -28,8 +26,7 @@ apis:
         positions: [query-params]
         key: ip
     cache-lasts-days: 1
-  IP Quality Score:
-    name: IP Quality Score
+  - name: IP Quality Score
     endpoint: https://ipqualityscore.com/api/json/ip
     map-fields: true
     field-mapping:
@@ -68,8 +65,7 @@ apis:
         positions: [query-params]
         key: ip
     cache-lasts-days: 1
-  IP Reputation:
-    name: IP Reputation
+  - name: IP Reputation
     endpoint: https://ip-reputation-geoip-and-detect-vpn.p.rapidapi.com/
     map-fields: true
     field-mapping:
@@ -116,8 +112,7 @@ apis:
         positions: [query-params]
         key: ip
     cache-lasts-days: 1
-  OTX Alien Vault:
-    name: OTX Alien Vault
+  - name: OTX Alien Vault
     endpoint: https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/general
     map-fields: false
     headers:
@@ -137,8 +132,7 @@ apis:
       - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/url_list
       - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/passive_dns
     cache-lasts-days: 1
-  Proxy Check:
-    name: Proxy Check
+  - name: Proxy Check
     endpoint: http://proxycheck.io/v2/IP_ADDRESS
     map-fields: true
     field-mapping:
@@ -179,8 +173,7 @@ apis:
           - field-mapping
         key: IP_ADDRESS
     cache-lasts-days: 1
-  VPN API:
-    name: VPN API
+  - name: VPN API
     endpoint: https://vpnapi.io/api/<IP_ADDRESS>
     map-fields: true
     field-mapping:
@@ -215,3 +208,32 @@ apis:
         positions: [endpoint]
         key: <IP_ADDRESS>
     cache-lasts-days: 1
+duplicates-resolvers:
+  - path: location
+    function: overwrite
+    factors:
+      - name: IP Reputation
+  - path: security.risk
+    function: mean-average
+    factors:
+      - name: Proxy Check
+        coefficient: 1
+        converter: float
+      - name: IP Reputation
+        coefficient: 1
+        converter: float
+      - name: IP Quality Score
+        coefficient: 1
+        converter: float
+      - name: OTX Alien Vault
+        coefficient: 1
+        converter: float
+        path: reputation
+      - name: Fraud Sentinel
+        coefficient: 1
+        converter: float
+        path: live.karma
+      - name: Abuse IP DB
+        coefficient: 1
+        converter: float
+        path: data.abuseConfidenceScore

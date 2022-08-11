@@ -7,8 +7,9 @@ from threading import Thread, Lock
 
 syspath.append(pathjoin(syspath[0], ".."))
 from app import logger, redis_client
+import logic.resolvers as resolvers
 
-def enrich(params: dict, api: dict, lock: Lock, response: dict):
+def enrich(params: dict, api: dict, lock: Lock, response: dict, paths : dict = dict()):
     try:
         key = api["name"]
         for pv in params.values():
@@ -51,13 +52,10 @@ def enrich(params: dict, api: dict, lock: Lock, response: dict):
                             variables[pv["key"]] = params[pk]
             processed_data = map_fields(raw_data, api["field-mapping"], variables)
             Thread(target=check_unmapped, args=(raw_data, api["name"])).start()
+        #api_paths = find_all_paths(processed_data)
         lock.acquire()
-        response.update({
-            api["name"]: {
-                "data": processed_data,
-                "paths": find_all_paths(processed_data)
-            }
-        })
+        response.update({ api["name"]: processed_data })
+        #paths.update({ api["name"]: api_paths })
         lock.release()
     except BaseException as e:
         logger.error(f"{ api['name'] } -> { e }", exc_info=1, stack_info=1)
@@ -122,15 +120,32 @@ def process(body: dict, config: dict) -> dict:
     threads = list()
     response = dict()
     lock = Lock()
-    for api in config["apis"].values():
+    for api in config["apis"]:
         if api["use"]:
-            threads.append(Thread(target=enrich, args=(body, api, lock, response)))
+            threads.append(
+                Thread(
+                    target=enrich,
+                    args=(body, api, lock, response)
+                )
+            )
             threads[-1].start()
-    for th in threads:
-        th.join()
-    if len(threads) == len(response.keys()):
-        logger.info("Got response from all APIs")
-    else:
-        logger.warning("Some APIs failed")
-    Thread(target=check_dups, args=(response,)).start()
-    return response
+    for th in threads: th.join()
+    if len(threads) == len(response.keys()): logger.info("Got response from all APIs")
+    else: logger.warning("Some APIs failed")
+    threads.clear()
+    result = dict()
+    for resolver in config["duplicates-resolvers"]:
+        threads.append(
+            Thread(
+                target=resolvers.functions[resolver["function"]],
+                args=(resolver["path"], resolver["factors"], response, result, lock)
+            )
+        )
+        threads[-1].start()
+    for th in threads: th.join()
+    result = {
+        **response,
+        **result
+    }
+    #Thread(target=check_dups, args=(response,)).start()
+    return result
