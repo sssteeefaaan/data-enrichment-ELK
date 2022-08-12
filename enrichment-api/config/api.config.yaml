@@ -1,19 +1,32 @@
 apis:
   - name: Abuse IP DB
     endpoint: https://api.abuseipdb.com/api/v2/check
-    map-fields: false
+    map-fields: true
+    field-mapping:
+      security:
+        public-address: data.isPublic
+        risk: data.abuseConfidenceScore
+        proxy-type: data.usageType
+        report-count: data.totalReports
+        last-report-at: data.lastReportedAt
+        whitelisted: data.isWhitelisted
+      network:
+        provider: data.isp
+        domain: data.domain
+        host: data.hostnames
     headers:
       Accept: application/json
       Key: ${ ABUSE_IP_DB_API_KEY }
     method: GET
     query-params:
-      maxAgeInDays: '90'
+      maxAgeInDays: "90"
     use: true
+    combine-results: true
     parameters:
       ip:
         positions: [query-params]
         key: ipAddress
-    cache-lasts-days: 1
+    cache-lasts-days: 30
   - name: Fraud Sentinel
     endpoint: https://api.fraudsentinel.com/api/sentinel.json
     map-fields: false
@@ -21,11 +34,12 @@ apis:
     query-params:
       api_token: ${ FRAUD_SENTINEL_API_KEY }
     use: true
+    combine-results: false
     parameters:
       ip:
         positions: [query-params]
         key: ip
-    cache-lasts-days: 1
+    cache-lasts-days: 30
   - name: IP Quality Score
     endpoint: https://ipqualityscore.com/api/json/ip
     map-fields: true
@@ -60,11 +74,12 @@ apis:
       mobile: false
       strictness: 0
     use: true
+    combine-results: true
     parameters:
       ip:
         positions: [query-params]
         key: ip
-    cache-lasts-days: 1
+    cache-lasts-days: 30
   - name: IP Reputation
     endpoint: https://ip-reputation-geoip-and-detect-vpn.p.rapidapi.com/
     map-fields: true
@@ -107,31 +122,33 @@ apis:
       X-RapidAPI-Key: ${IP_REPUTATION_API_KEY}
     method: GET
     use: true
+    combine-results: true
     parameters:
       ip:
         positions: [query-params]
         key: ip
-    cache-lasts-days: 1
+    cache-lasts-days: 30
   - name: OTX Alien Vault
     endpoint: https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/general
     map-fields: false
     headers:
       X-OTX-API-KEY: ${OTX_ALIEN_VAULT_API_KEY}
     method: GET
-    use: true
+    use: false
+    combine-results: false
     parameters:
       ip:
         positions: [endpoint]
         key: <IP_ADDRESS>
     additional-variables:
       endpoints:
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/general
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/reputation
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/geo
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/malware
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/url_list
-      - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/passive_dns
-    cache-lasts-days: 1
+        - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/general
+        - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/reputation
+        - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/geo
+        - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/malware
+        - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/url_list
+        - https://otx.alienvault.com/api/v1/indicators/IPv4/<IP_ADDRESS>/passive_dns
+    cache-lasts-days: 30
   - name: Proxy Check
     endpoint: http://proxycheck.io/v2/IP_ADDRESS
     map-fields: true
@@ -166,13 +183,14 @@ apis:
       time: 1
       vpn: 1
     use: true
+    combine-results: true
     parameters:
       ip:
-        positions: 
+        positions:
           - endpoint
           - field-mapping
         key: IP_ADDRESS
-    cache-lasts-days: 1
+    cache-lasts-days: 30
   - name: VPN API
     endpoint: https://vpnapi.io/api/<IP_ADDRESS>
     map-fields: true
@@ -203,16 +221,13 @@ apis:
     query-params:
       key: ${VPN_API_KEY}
     use: true
+    combine-results: true
     parameters:
       ip:
         positions: [endpoint]
         key: <IP_ADDRESS>
-    cache-lasts-days: 1
+    cache-lasts-days: 30
 duplicates-resolvers:
-  - path: location
-    function: overwrite
-    factors:
-      - name: IP Reputation
   - path: security.risk
     function: mean-average
     factors:
@@ -225,10 +240,6 @@ duplicates-resolvers:
       - name: IP Quality Score
         coefficient: 1
         converter: float
-      - name: OTX Alien Vault
-        coefficient: 1
-        converter: float
-        path: reputation
       - name: Fraud Sentinel
         coefficient: 1
         converter: float
@@ -236,4 +247,4 @@ duplicates-resolvers:
       - name: Abuse IP DB
         coefficient: 1
         converter: float
-        path: data.abuseConfidenceScore
+response-type: clean

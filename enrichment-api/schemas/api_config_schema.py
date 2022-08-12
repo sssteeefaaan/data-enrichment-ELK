@@ -12,6 +12,9 @@ api_configuration_schema = {
                     "use": {
                         "type": "boolean"
                     },
+                    "combine-results": {
+                        "type": "boolean"
+                    },
                     "parameters": {
                         "type": "object",
                         "patternProperties":{
@@ -68,7 +71,7 @@ api_configuration_schema = {
                     "cache-lasts-days": {
                         "type": "integer",
                         "minimum": 1,
-                        "exclusiveMaximum": 30
+                        "maximum": 120
                     },
                     "additional-variables": {
                         "type": "object"
@@ -77,6 +80,7 @@ api_configuration_schema = {
                 "required": [
                     "name",
                     "use",
+                    "combine-results",
                     "endpoint",
                     "method",
                     "map-fields",
@@ -131,13 +135,17 @@ api_configuration_schema = {
                     "factors"
                 ],
                 "additionalProperties": False
-            },
-            "minItems": 1
+            }
+        },
+        "response-type": {
+            "type": "string",
+            "enum": ["full", "raw", "clean"]
         }
     },
     "additionalProperties": False,
     "required": [
-        "apis"
+        "apis",
+        "response-type"
     ],
     "$defs": {
         "mappings": {

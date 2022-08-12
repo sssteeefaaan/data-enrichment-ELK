@@ -9,7 +9,7 @@ syspath.append(pathjoin(syspath[0], ".."))
 from app import logger, redis_client
 import logic.resolvers as resolvers
 
-def enrich(params: dict, api: dict, lock: Lock, response: dict, paths : dict = dict()):
+def enrich(params: dict, api: dict, lock: Lock, response: dict):
     try:
         key = api["name"]
         for pv in params.values():
@@ -52,13 +52,31 @@ def enrich(params: dict, api: dict, lock: Lock, response: dict, paths : dict = d
                             variables[pv["key"]] = params[pk]
             processed_data = map_fields(raw_data, api["field-mapping"], variables)
             Thread(target=check_unmapped, args=(raw_data, api["name"])).start()
-        #api_paths = find_all_paths(processed_data)
         lock.acquire()
-        response.update({ api["name"]: processed_data })
-        #paths.update({ api["name"]: api_paths })
+        response["raw"].update({
+                api["name"]: processed_data
+            }
+        )
+        if api["combine-results"]:
+            combine_results(response["combined"], processed_data)
         lock.release()
     except BaseException as e:
         logger.error(f"{ api['name'] } -> { e }", exc_info=1, stack_info=1)
+
+def combine_results(data : dict, processed : dict):
+    unwanted = set([None, "ERROR", "N/A", "null", ""])
+    for k, v in processed.items():
+        try:
+            if type(v) == dict:
+                combine_results(data.setdefault(k, dict()), v)
+            elif type(v) == list:
+                data[k] = v
+            else:
+                if v not in unwanted:
+                    data[k] = v
+        except Exception as e:
+            logger.error("Combine-Results", exc_info=1, stack_info=1)
+            data[k] = "ERROR"
 
 def find_all_paths(data : dict, prefix : str = "") -> list:
     ret = list()
@@ -118,7 +136,10 @@ def check_dups(data : dict):
 
 def process(body: dict, config: dict) -> dict:
     threads = list()
-    response = dict()
+    response = {
+        "raw": dict(),
+        "combined": dict()
+    }
     lock = Lock()
     for api in config["apis"]:
         if api["use"]:
@@ -130,7 +151,7 @@ def process(body: dict, config: dict) -> dict:
             )
             threads[-1].start()
     for th in threads: th.join()
-    if len(threads) == len(response.keys()): logger.info("Got response from all APIs")
+    if len(threads) == len(response["raw"].keys()): logger.info("Got response from all APIs")
     else: logger.warning("Some APIs failed")
     threads.clear()
     result = dict()
@@ -138,14 +159,15 @@ def process(body: dict, config: dict) -> dict:
         threads.append(
             Thread(
                 target=resolvers.functions[resolver["function"]],
-                args=(resolver["path"], resolver["factors"], response, result, lock)
+                args=(resolver["path"], resolver["factors"], response["raw"], result, lock)
             )
         )
         threads[-1].start()
     for th in threads: th.join()
-    result = {
-        **response,
-        **result
-    }
-    #Thread(target=check_dups, args=(response,)).start()
-    return result
+    combine_results(response["combined"], result)
+    if config["response-type"] == "clean":
+        return response["combined"]
+    elif config["response-type"] == "raw":
+        return response["raw"]
+    else:
+        return response
