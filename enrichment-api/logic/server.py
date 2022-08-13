@@ -23,7 +23,7 @@ async def enrich(request : Request, body: dict = { "ip": get('https://api.myip.c
         logger.warning(f"POST-Enrich: Accessed from [{ request.client.host }:{ request.client.port }]")
         return process(body, api_config)
     except BaseException as e:
-        logger.error(e, exc_info=1, stack_info=1)
+        logger.error(e)
         return JSONResponse({ "message": "Unsuccess!" }, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @app.get("/api-configuration", dependencies=[Depends(get_current_active_user)], tags=["Admin"])
@@ -42,7 +42,7 @@ async def update_api_configuration(request : Request, configuration_file: Upload
         redis_client.publish("api-config", dumps(config))
         return { "message": "Success!" }
     except Exception as e:
-        logger.error(e, exc_info=1, stack_info=1)
+        logger.error(e)
         return JSONResponse({ "message": "Unsuccess!" }, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @app.get("/log-configuration", dependencies=[Depends(get_current_active_user)], tags=["Admin"])
@@ -61,7 +61,7 @@ async def update_log_configuration(request : Request, configuration_file: Upload
         redis_client.publish("log-config", dumps(config))
         return { "message": "Success!" }
     except Exception as e:
-        logger.error(e, exc_info=1, stack_info=1)
+        logger.error(e)
         return JSONResponse({ "message": "Unsuccess!" }, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @app.post("/token", response_model=Token, tags=["Authentication"])
@@ -80,5 +80,5 @@ async def login_for_access_token(request : Request, form_data: OAuth2PasswordReq
         )
         return { "access_token": access_token, "token_type": "bearer" }
     except BaseException as e:
-        logger.error(e, exc_info=1, stack_info=1)
+        logger.error(e)
         return JSONResponse({ "message": "Unsuccess!" }, status_code=status.HTTP_401_UNAUTHORIZED)

@@ -4,16 +4,34 @@ apis:
     map-fields: true
     field-mapping:
       security:
-        public-address: data.isPublic
-        risk: data.abuseConfidenceScore
-        proxy-type: data.usageType
-        report-count: data.totalReports
-        last-report-at: data.lastReportedAt
-        whitelisted: data.isWhitelisted
+        public-address:
+          - data
+          - isPublic
+        risk:
+          - data
+          - abuseConfidenceScore
+        proxy-type:
+          - data
+          - usageType
+        report-count:
+          - data
+          - totalReports
+        last-report-at:
+          - data
+          - lastReportedAt
+        whitelisted:
+          - data
+          - isWhitelisted
       network:
-        provider: data.isp
-        domain: data.domain
-        host: data.hostnames
+        provider:
+          - data
+          - isp
+        domain:
+          - data
+          - domain
+        host:
+          - data
+          - hostnames
     headers:
       Accept: application/json
       Key: ${ ABUSE_IP_DB_API_KEY }
@@ -45,26 +63,44 @@ apis:
     map-fields: true
     field-mapping:
       security:
-        vpn: vpn
-        proxy: proxy
-        tor: tor
-        bot: bot_status
-        risk: fraud_score
-        crawler: is_crawler
-        mobile: mobile
+        vpn:
+          - vpn
+        proxy:
+          - proxy
+        tor:
+          - tor
+        bot:
+          - bot_status
+        risk:
+          - fraud_score
+        crawler:
+          - is_crawler
+        mobile:
+          - mobile
       location:
-        city: city
-        region: region
-        country-code: country_code
-        latitude: latitude
-        longitude: longitude
-        time-zone: timezone
-        zip-code: zip_code
+        city:
+          - city
+        region:
+          - region
+        country-code:
+          - country_code
+        latitude:
+          - latitude
+        longitude:
+          - longitude
+        time-zone:
+          - timezone
+        zip-code:
+          - zip_code
       network:
-        host: host
-        autonomous-system-number: ASN
-        autonomous-system-organization: organization
-        provider: ISP
+        host:
+          - host
+        autonomous-system-number:
+          - ASN
+        autonomous-system-organization:
+          - organization
+        provider:
+          - ISP
     method: GET
     query-params:
       allow_public_access_points: true
@@ -85,38 +121,68 @@ apis:
     map-fields: true
     field-mapping:
       security:
-        risk: risk
-        risk-level: risk_level
-        mobile: mobile_carrier
-        anonymizer: anonymizer
-        vpn: is_vpn_proxy
-        tor: is_tor
-        datacenter: is_datacenter
-        educational: is_educational
-        military: is_military
-        government: is_government
-        business: is_business
-        malicious: is_malicious
-        abusive: is_abusive
-        bogon: is_bogon
+        risk:
+          - risk
+        risk-level:
+          - risk_level
+        mobile:
+          - mobile_carrier
+        anonymizer:
+          - anonymizer
+        vpn:
+          - is_vpn_proxy
+        tor:
+          - is_tor
+        datacenter:
+          - is_datacenter
+        educational:
+          - is_educational
+        military:
+          - is_military
+        government:
+          - is_government
+        business:
+          - is_business
+        malicious:
+          - is_malicious
+        abusive:
+          - is_abusive
+        bogon:
+          - is_bogon
       location:
-        latitude: latitude
-        longitude: longitude
-        city: city
-        region: region
-        region-code: region_code
-        country: country
-        country-code: country_code
-        continent: continent
-        continent-code: continent_code
-        is-in-european-union: in_eu
-        time-zone: time_zone
+        latitude:
+          - latitude
+        longitude:
+          - longitude
+        city:
+          - city
+        region:
+          - region
+        region-code:
+          - region_code
+        country:
+          - country
+        country-code:
+          - country_code
+        continent:
+          - continent
+        continent-code:
+          - continent_code
+        is-in-european-union:
+          - in_eu
+        time-zone:
+          - time_zone
       network:
-        network: cidr
-        domain: domain
-        autonomous-system-number: asn
-        autonomous-system-organization: organization
-        provider: isp
+        network:
+          - cidr
+        domain:
+          - domain
+        autonomous-system-number:
+          - asn
+        autonomous-system-organization:
+          - organization
+        provider:
+          - isp
     headers:
       X-RapidAPI-Host: ip-reputation-geoip-and-detect-vpn.p.rapidapi.com
       X-RapidAPI-Key: ${IP_REPUTATION_API_KEY}
@@ -154,22 +220,50 @@ apis:
     map-fields: true
     field-mapping:
       network:
-        autonomous-system-number: IP_ADDRESS.asn
-        autonomous-system-organization: IP_ADDRESS.organisation
-        provider: IP_ADDRESS.provider
+        autonomous-system-number:
+          - IP_ADDRESS
+          - asn
+        autonomous-system-organization:
+          - IP_ADDRESS
+          - organisation
+        provider:
+          - IP_ADDRESS
+          - provider
       location:
-        continent: IP_ADDRESS.continent
-        country: IP_ADDRESS.country
-        isocode: IP_ADDRESS.isocode
-        region: IP_ADDRESS.region
-        regioncode: IP_ADDRESS.regioncode
-        city: IP_ADDRESS.city
-        latitude: IP_ADDRESS.latitude
-        longitude: IP_ADDRESS.longitude
+        continent:
+          - IP_ADDRESS
+          - continent
+        country:
+          - IP_ADDRESS
+          - country
+        isocode:
+          - IP_ADDRESS
+          - isocode
+        region:
+          - IP_ADDRESS
+          - region
+        regioncode:
+          - IP_ADDRESS
+          - regioncode
+        city:
+          - IP_ADDRESS
+          - city
+        latitude:
+          - IP_ADDRESS
+          - latitude
+        longitude:
+          - IP_ADDRESS
+          - longitude
       security:
-        proxy: IP_ADDRESS.proxy
-        proxy-type: IP_ADDRESS.type
-        risk: IP_ADDRESS.risk
+        proxy:
+          - IP_ADDRESS
+          - proxy
+        proxy-type:
+          - IP_ADDRESS
+          - type
+        risk:
+          - IP_ADDRESS
+          - risk
     method: GET
     query-params:
       asn: 1
@@ -196,27 +290,65 @@ apis:
     map-fields: true
     field-mapping:
       security:
-        vpn: security.vpn
-        proxy: security.proxy
-        tor: security.tor
-        relay: security.relay
+        vpn:
+          - security
+          - vpn
+        proxy:
+          - security
+          - proxy
+        tor:
+          - security
+          - tor
+        relay:
+          - security
+          - relay
       location:
-        city: location.city
-        region: location.region
-        country: location.country
-        continent: location.continent
-        region-code: location.region_code
-        country-code: location.country_code
-        latitude: location.latitude
-        longitude: location.longitude
-        time-zone: location.time_zone
-        locale-code: location.locale_code
-        metro-code: location.metro_code
-        is-in-european-union: location.is_in_european_union
+        city:
+          - location
+          - city
+        region:
+          - location
+          - region
+        country:
+          - location
+          - country
+        continent:
+          - location
+          - continent
+        region-code:
+          - location
+          - region_code
+        country-code:
+          - location
+          - country_code
+        latitude:
+          - location
+          - latitude
+        longitude:
+          - location
+          - longitude
+        time-zone:
+          - location
+          - time_zone
+        locale-code:
+          - location
+          - locale_code
+        metro-code:
+          - location
+          - metro_code
+        is-in-european-union:
+          - location
+          - is_in_european_union
       network:
-        network: network.network
-        autonomous-system-number: network.autonomous_system_number
-        autonomous-system-organization: network.autonomous_system_organization
+        network:
+          - network
+          - network
+        autonomous-system-number:
+          - network
+          - autonomous_system_number
+        autonomous-system-organization:
+          - network
+          - autonomous_system_organization
     method: GET
     query-params:
       key: ${VPN_API_KEY}
@@ -228,7 +360,9 @@ apis:
         key: <IP_ADDRESS>
     cache-lasts-days: 30
 duplicates-resolvers:
-  - path: security.risk
+  - path:
+      - security
+      - risk
     function: mean-average
     factors:
       - name: Proxy Check
@@ -243,8 +377,35 @@ duplicates-resolvers:
       - name: Fraud Sentinel
         coefficient: 1
         converter: float
-        path: live.karma
+        path:
+          - live
+          - karma
       - name: Abuse IP DB
         coefficient: 1
         converter: float
-response-type: clean
+  - path:
+      - security
+      - proxy
+    function: or
+    factors:
+      - name: Proxy Check
+        converter: string-to-boolean
+      - name: IP Quality Score
+      - name: VPN API
+  - path:
+      - security
+      - vpn
+    function: or
+    factors:
+      - name: IP Reputation
+      - name: IP Quality Score
+      - name: VPN API
+  - path:
+      - security
+      - tor
+    function: or
+    factors:
+      - name: IP Reputation
+      - name: IP Quality Score
+      - name: VPN API
+response-type: full

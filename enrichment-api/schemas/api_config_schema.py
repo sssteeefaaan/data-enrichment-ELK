@@ -96,11 +96,14 @@ api_configuration_schema = {
                 "type": "object",
                 "properties": {
                     "path": {
-                        "type": "string"
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "function": {
                         "type": "string",
-                        "enum": ["mean-average", "overwrite"]
+                        "enum": ["mean-average", "overwrite", "or", "and"]
                     },
                     "factors": {
                         "type": "array",
@@ -112,13 +115,18 @@ api_configuration_schema = {
                                 },
                                 "converter": {
                                     "type": "string",
-                                    "enum": ["float", "int"]
+                                    "enum": ["float", "int", "string-to-boolean", "null"],
+                                    "default": "null"
                                 },
                                 "coefficient": {
-                                    "type": "number"
+                                    "type": "number",
+                                    "default": 1
                                 },
                                 "path": {
-                                    "type": "string"
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
                                 }
                             },
                             "required": [
@@ -149,9 +157,12 @@ api_configuration_schema = {
     ],
     "$defs": {
         "mappings": {
-            "type": ["string", "object"],
+            "type": ["array", "object"],
             "patternProperties": {
                 "^[A-z$].*": { "$ref": "#/$defs/mappings" }
+            },
+            "items": {
+                "type": "string"
             },
             "additionalProperties": False
         }
