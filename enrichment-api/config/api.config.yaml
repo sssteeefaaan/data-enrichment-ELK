@@ -408,4 +408,4 @@ duplicates-resolvers:
       - name: IP Reputation
       - name: IP Quality Score
       - name: VPN API
-response-type: full
+response-type: clean
