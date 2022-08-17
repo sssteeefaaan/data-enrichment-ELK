@@ -34,7 +34,7 @@ timeout_keep_alive: 5
 use_colors: true
 reload: false
 reload_delay: 0.25
-root_path: ''
+root_path: ""
 ws: auto
 ws_max_size: 16777216
 ws_per_message_deflate: true

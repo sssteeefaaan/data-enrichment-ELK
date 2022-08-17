@@ -17,7 +17,7 @@ dictConfig(log_config)
 logger = getLogger("enrichment-api")
 install_mp_handler(logger)
 
-redis_client = Redis('/tmp/redis.db')
+redis_client = Redis('/tmp/data-enrichment.db')
 
 def main():
     try:
@@ -27,7 +27,7 @@ def main():
 
         run("logic.server:app", **config)
     except BaseException as e:
-        logger.error(e)
+        logger.error(f"[App](main): { e }")
 
 if __name__ == "__main__":
     main()

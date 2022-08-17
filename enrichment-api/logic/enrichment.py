@@ -17,7 +17,7 @@ def enrich(params: dict, api: dict, lock: Lock, response: dict):
         raw_data = redis_client.get(key)
         req = dict()
         if not raw_data:
-            req = { x : api.get(x, dict()) for x in ["endpoint", "headers", "query-params", "body", "field-mapping"] }
+            req = { x : api.get(x, dict()) for x in ["endpoint", "headers", "query-params", "body", "response"] }
             for pk, pv in api["parameters"].items():
                 value = params[pk]
                 for pos in pv["positions"]:
@@ -33,23 +33,21 @@ def enrich(params: dict, api: dict, lock: Lock, response: dict):
                 data=req["body"]
             )
             if res.status_code == 200:
-                logger.debug(f'{ __file__ } Enrich', f'Success for [{ api["name"] }]')
+                logger.debug(f'[Enrichment] Enrich -> Success for [{ api["name"] }]')
                 raw_data = res.json()
                 redis_client.set(key, dumps(raw_data))
                 redis_client.expire(key, int(api["cache-lasts-days"]) * 60 * 60 * 24)
             else:
                 raise Exception(f"Endpoint [{ api['name'] }] failed: '{ res.text }'")
         else:
-            raw_data = loads(raw_data.decode("utf-8"))
+            raw_data = loads(raw_data)
         processed_data = raw_data
         if api["map-fields"]:
+            variables = req.get("response", dict())
             for pk, pv in api["parameters"].items():
-                variables = req.get("field-mapping", None)
-                if variables == None:
-                    variables = dict()
-                    for pos in pv["positions"]:
-                        if pos == "field-mapping":
-                            variables[pv["key"]] = params[pk]
+                for pos in pv["positions"]:
+                    if pos == "response":
+                        variables[pv["key"]] = params[pk]
             processed_data = map_fields(raw_data, api["field-mapping"], variables)
             Thread(target=check_unmapped, args=(raw_data, api["name"])).start()
         lock.acquire()
@@ -61,7 +59,7 @@ def enrich(params: dict, api: dict, lock: Lock, response: dict):
             combine_results(response["combined"], processed_data)
         lock.release()
     except BaseException as e:
-        logger.error(f'{ __file__ } Enrich', e, api["name"])
+        logger.error(f'[Enrichment](enrich): { e } -> { api["name"] }')
 
 def combine_results(data : dict, processed : dict, default = "ERROR"):
     unwanted = set([None, "ERROR", "N/A", "null", ""])
@@ -75,7 +73,7 @@ def combine_results(data : dict, processed : dict, default = "ERROR"):
                 if v not in unwanted:
                     data[k] = v
         except Exception as e:
-            logger.error(f'{ __file__ } Combine-Results', e)
+            logger.error(f'[Enrichment](combine_results): { e }')
             data[k] = default
 
 def find_all_paths(data : dict, prefix : str = "") -> list:
@@ -90,34 +88,32 @@ def find_all_paths(data : dict, prefix : str = "") -> list:
 def check_unmapped(data : dict, name : str, path : str = ""):
     for k, v in data.items():
         if type(v) != dict:
-            logger.warning(f"Unused field ['{ path }{ k }' -> '{ v }'] in mappings for [{ name }]")
+            logger.warning(f"[Enrichment](check_unmapped): Unused field ['{ path }{ k }' -> '{ v }'] in mappings for [{ name }]")
         else:
             check_unmapped(v, name, f'{ k }.')
 
 def map_fields(data: dict, mapping: dict, variables : dict = dict()):
     res = {}
     try:
-        for k in mapping.keys():
-            mp = mapping[k]
-            if type(mp) == dict:
-                res[k] = map_fields(data, mp, variables)
+        for k, v in mapping.items():
+            if type(v) == dict:
+                res[k] = map_fields(data, v, variables)
             else:
-                res[k] = find_item_path(data, mp, variables)
+                res[k] = find_item_path(data, v, variables)
     except BaseException as e:
-        logger.error(f'{ __file__ } Map-Fields', e)
+        logger.error(f'[Enrichment](map_fields): { e }')
     return res
 
 def find_item_path(data : dict, path : list, variables : dict = dict(), default = "ERROR"):
     if len(path) < 1:
         return default
-    head = path.pop(0)
-    head = variables.get(head, head)
+    head = variables.get(path[0], path[0])
     try:
-        if not path:
+        if len(path) == 1:
             return data.pop(head)
-        return find_item_path(data[head], path, variables, default)
+        return find_item_path(data[head], path[1:], variables, default)
     except BaseException as e:
-        logger.error(f'{ __file__ } Find-Item-Path', e)
+        logger.error(f'[Enrichment](find_item_path): { e } -> { path }')
         return default
     
 def check_dups(data : dict):
@@ -130,7 +126,7 @@ def check_dups(data : dict):
                 paths[p] = [k]
     for k, v in paths.items():
         if len(v) > 1:
-            logger.warning(f"Duplicated fields '{ k }' found in: { ', '.join(v) }")
+            logger.warning(f"[Enrichment](check_dups): Duplicated fields '{ k }' found in: { ', '.join(v) }")
 
 def process(body: dict, config: dict) -> dict:
     threads = list()
@@ -149,8 +145,8 @@ def process(body: dict, config: dict) -> dict:
             )
             threads[-1].start()
     for th in threads: th.join()
-    if len(threads) == len(response["raw"].keys()): logger.info("Got response from all APIs")
-    else: logger.warning("Some APIs failed")
+    if len(threads) == len(response["raw"].keys()): logger.info("[Enrichment](process): Got response from all APIs")
+    else: logger.warning("[Enrichment](process): Some APIs failed")
     threads.clear()
     result = dict()
     for resolver in config["duplicates-resolvers"]:

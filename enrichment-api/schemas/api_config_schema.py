@@ -25,7 +25,7 @@ api_configuration_schema = {
                                         "type": "array",
                                         "items": {
                                             "type": "string",
-                                            "enum": ["endpoint", "query-params", "body", "headers", "field-mapping"]
+                                            "enum": ["endpoint", "query-params", "body", "headers", "response"]
                                         }
                                     },
                                     "key": {

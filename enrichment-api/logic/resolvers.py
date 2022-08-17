@@ -13,7 +13,7 @@ def find_value(data : dict, path : list, default = 0):
             return data[head]
         return find_value(data[head], path[1:])
     except Exception as e:
-        logger.error(f'{ __file__ } Find-Value', e, path)
+        logger.error(f'[Resolvers](find_value): { e } -> { path }')
         return default
 
 def set_value(data : dict, path : list, value):
@@ -21,12 +21,11 @@ def set_value(data : dict, path : list, value):
         head = path[0]
         if len(path) == 1:
             data[head] = value
-            return
-        data[head] = data.get(head, dict())
-        set_value(data[head], path[1:], value)
+        else:
+            data[head] = data.get(head, dict())
+            set_value(data[head], path[1:], value)
     except Exception as e:
-        logger.error(f'{ __file__ } Set-Value', e, path)
-        return 0
+        logger.error(f'[Resolvers](set_value): { e } -> { path }')
     
 def mean_average(path : list, factors : list, response : dict, result : dict, lock : Lock):
     try:
@@ -39,7 +38,7 @@ def mean_average(path : list, factors : list, response : dict, result : dict, lo
         set_value(result, path, avg)
         lock.release()
     except Exception as e:
-        logger.error(f'{ __file__ } Mean-Average', e, path)
+        logger.error(f'[Resolvers](mean_average): { e } -> { path }')
 
 def overwrite(path : list, factors : list, response : dict, result : dict, lock : Lock):
     try:
@@ -50,21 +49,21 @@ def overwrite(path : list, factors : list, response : dict, result : dict, lock 
         set_value(result, path, val)
         lock.release()
     except Exception as e:
-        logger.error(f'{ __file__ } Overwrite', e, path)
+        logger.error(f'[Resolvers](overwrite): { e } -> { path }')
 
 def or_resolver(path : list, factors : list, response : dict, result : dict, lock : Lock):
     try:
         value = False
         for f in factors:
             my_path = f.get("path", path)
-            value = value or converters.functions[f.get("converter", "null")](find_value(response[f['name']], my_path, False))
+            value = value or converters.functions[f.get("converter", "null")](find_value(response[f['name']], my_path, False), False)
             if value:
                 break
         lock.acquire()
         set_value(result, path, value)
         lock.release()
     except Exception as e:
-        logger.error(f'{ __file__ } Or-Resolvser', e, path)
+        logger.error(f'[Resolvers](or_resolver): { e } -> { path }')
         
 
 def and_resolver(path : list, factors : list, response : dict, result : dict, lock : Lock):
@@ -72,14 +71,14 @@ def and_resolver(path : list, factors : list, response : dict, result : dict, lo
         value = True
         for f in factors:
             my_path = f.get("path", path)
-            value = value and converters.functions[f.get("converter", "null")](find_value(response[f['name']], my_path, True))
-            if value:
+            value = value and converters.functions[f.get("converter", "null")](find_value(response[f['name']], my_path, True), True)
+            if not value:
                 break
         lock.acquire()
         set_value(result, path, value)
         lock.release()
     except Exception as e:
-        logger.error(f'{ __file__ } And-Resolvser', e, path)
+        logger.error(f'[Resolvers](and_resolvser): { e } -> { path }')
 
 functions = {
     "mean-average": mean_average,

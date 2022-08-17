@@ -282,7 +282,7 @@ apis:
       ip:
         positions:
           - endpoint
-          - field-mapping
+          - response
         key: IP_ADDRESS
     cache-lasts-days: 30
   - name: VPN API
