@@ -34,7 +34,7 @@ apis:
           - hostnames
     headers:
       Accept: application/json
-      Key: ${ ABUSE_IP_DB_API_KEY }
+      Key: ${ ABUSE_IP_DB_API_KEY1 }
     method: GET
     query-params:
       maxAgeInDays: "90"
